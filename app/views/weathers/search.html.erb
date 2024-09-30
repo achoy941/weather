@@ -1,0 +1,51 @@
+
+<head>
+  <style>
+    table.weather { width: 100% }
+    td.key { border:1px solid black; text-align:right }
+    td.value { border:1px solid black }
+    .cached { color: green; font-size: 18px }
+    .uncached { color: lightgrey; font-size: 18px }
+    .flash { margin: 5px; padding: 5px }
+    .flash.error { background-color: red; color: white; }
+    .flash.alert { background-color: yellow; }
+
+  </style>
+</head>
+<h1>Weather</h1>
+
+<% flash.each do |key, value| %>
+  <%= content_tag :div, value, class: "flash #{key}" %>
+<% end %>
+
+<div>
+  <%= form_tag(weathers_search_path) do %>
+    Address: <%= text_field_tag(:address) %> <%= submit_tag(value = "Submit") %>
+  <% end %>
+</div>
+
+<% if @weather %>
+  <% weather_conditions = @weather.current_weather['weather_conditions']%>
+  <div style="padding: 20rem" 5rem>
+    <table class="weather">
+      <caption>
+        <h3>Current Temperature</h3>
+        <span title="<%= @weather.cached ? 'cached' : 'uncached' %>" class="<%= @weather.cached ? 'cached' : 'uncached' %>">&bull;</span>
+        <%= @weather.address['results'].first.dig('response', 'input', 'formatted_address') %>
+      </caption>
+      <tr>
+        <td class="key">Temperature</td>
+        <td class="value"><%= sprintf('%dF', (weather_conditions['temperature'] || 0).round) %></td>
+      </tr>
+      <tr>
+        <td class="key">High/Low</td>
+        <td class="value"><%= sprintf('%dF / %dF', (weather_conditions['temp_max'] || 0).round, (weather_conditions['temp_min'] || 0).round) %></td>
+      </tr>
+    </table>
+  </div>
+
+  <blockquote>
+    DEBUG:
+    <pre><%= JSON.pretty_generate(@weather.as_json) %></pre>
+  </blockquote>
+<% end %>
